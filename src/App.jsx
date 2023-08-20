@@ -1,102 +1,29 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import "./App.css";
-import { getData } from "./services/fetch";
 import { Header } from "./components/Header";
 import { Table } from "./components/Table";
-
-const ORDER = {
-  BY_FIRST_NAME: "first",
-  BY_LAST_NAME: "last",
-  BY_COUNTRY: "country",
-};
+import { ORDER } from "./const/const";
+import { useUsers } from "./hooks/users";
+import { useFilter } from "./hooks/filters";
 
 function App() {
-  const [users, setUsers] = useState([]);
+
   const [putColorBar, setPutColorBar] = useState(false);
-  const [order, setOrder] = useState(null);
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { loading, error, users, reinitUsers, deleteUser } = useUsers(); //users
+  const { order, listOrdered, togleOrder, query , cleanQuery, updateQuery } = useFilter(users); //filters
 
-  //guarda estado original
-  const originalUsers = useRef([]);
-
-  //carga los datos al motar el componente
-  async function init() {
-    setLoading(true);
-    const dataUsers = await getData();
-
-    //si devuelve null es que tuvo un error
-    if (dataUsers === null) return setError(true);
-
-    setUsers(dataUsers ?? []);
-    originalUsers.current = dataUsers ?? [];
-
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  
-  const sortedByField = useCallback(
-    (field, listUsers) => {
-      if (field === ORDER.BY_FIRST_NAME)
-        return [...listUsers].sort((user1, user2) =>
-          user1.name.first.localeCompare(user2.name.first)
-        );
-      if (field === ORDER.BY_LAST_NAME)
-        return [...listUsers].sort((user1, user2) =>
-          user1.name.last.localeCompare(user2.name.last)
-        );
-      if (field === ORDER.BY_COUNTRY)
-        return [...listUsers].sort((user1, user2) =>
-          user1.location.country.localeCompare(user2.location.country)
-        );
-    },
-    []
-  );
-
-  const listOrder = useCallback(() => {
-    //filtra por query
-    const listUsers = (query === "") ? [...users] : [...users].filter( user => user.location.country.toLowerCase().includes( query.toLowerCase() )) ;
-
-    //ordena por nombre, apellido y pais
-    if (order) return sortedByField(order, listUsers);
-    else return listUsers;
-
-  },[ query, order,sortedByField, users])
-
-
-
-  //manejadores de estado
   const handleBarColor = () => setPutColorBar(!putColorBar);
-
-  const handleName = () => {
-    if (order) return setOrder(null);
-    setOrder(ORDER.BY_FIRST_NAME);
-  }
-
-  const handleApellido = () => {
-    if (order) return setOrder(null);
-    setOrder(ORDER.BY_LAST_NAME);
-  }
-  const handleCountry = () => {
-    if (order) return setOrder(null);
-    setOrder(ORDER.BY_COUNTRY)
-  };
-  
-  const handleQuery = (e) => setQuery(e.target.value);
-
-  const handelDelete = (id) =>
-    setUsers(users.filter((user) => user.login.uuid !== id));
+  const handleName = () => togleOrder(ORDER.BY_FIRST_NAME);
+  const handleApellido = () => togleOrder(ORDER.BY_LAST_NAME);
+  const handleCountry = () => togleOrder(ORDER.BY_COUNTRY)
+  const handleQuery = (e) => updateQuery(e.target.value);
+  const handleDelete = (id) => deleteUser(id);
 
   const handleReset = () => {
     setPutColorBar(false);
-    setOrder(null)
-    setQuery("");
-    setUsers(originalUsers.current);
+    togleOrder(null)
+    cleanQuery();
+    reinitUsers();
   };
 
   return (
@@ -109,9 +36,10 @@ function App() {
         handleReset={handleReset}
         handleQuery={handleQuery}
         query={query}
+        order={order}
       />
 
-      {error && <h1>Error al cargar</h1>}
+      { error && <h1>Error al cargar</h1>}
       {!error && loading && <h1>Cargando</h1>}
       {!error && !loading && users.length === 0 && <h1>No hay usuarios</h1>}
       {!error && !loading && users.length !== 0 && (
@@ -120,8 +48,8 @@ function App() {
           handleName={handleName}
           handleApellido={handleApellido}
           handleCountry={handleCountry}
-          handelDelete={handelDelete}
-          listUsers={listOrder()}
+          handelDelete={handleDelete}
+          listUsers={listOrdered()}
         />
       )}
     </main>

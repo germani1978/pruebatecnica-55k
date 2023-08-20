@@ -1,11 +1,12 @@
+import { ORDER } from "../const/const";
 
 
-export const Header = ({ handleColor, handleCountry, handleReset, handleQuery, query }) => {
+export const Header = ({ handleColor, handleCountry, handleReset, handleQuery, query , order }) => {
   return (
     <div>
-        <div className="btns flex gap-4">
+        <div className="header btns grid gap-4 grid-cols-4">
         <button onClick={handleColor}>Colorear files</button>
-        <button onClick={handleCountry}>Ordenar por pais</button>
+        <button onClick={handleCountry}>{ order !== ORDER.BY_COUNTRY ? "Ordenar por pais":"No ordenar por pais" } </button>
         <button onClick={handleReset}>Resetear estado</button>
         <input type="text" placeholder="Buscar" onChange={handleQuery} value={query}/>
       </div>

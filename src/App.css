@@ -36,3 +36,7 @@ td button{
     border-radius: 10px;
 }
 
+.header button, .header input{
+    background-color: #d9d9db;
+}
+
