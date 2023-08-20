@@ -1,0 +1,38 @@
+.fondo{
+    background-color: #fff;
+    color: #213547;
+}
+.btns button, .btns input{
+    background-color: #f9f9f9;
+    padding: 8px 26px;
+    border-radius: 10px;
+}
+
+
+/* TABLE */
+table{
+    width: 100%;
+}
+thead{
+    font-weight: bold;
+}
+tr {
+    width: 100%;
+    margin-block: 10px;
+    text-align: center;
+}
+td{
+    margin-block: 10px;
+    
+}
+td:first-child{
+    display: flex;
+    justify-content: center;
+}
+
+td button{
+    background-color: #e5e5e5;
+    padding: 8px 26px;
+    border-radius: 10px;
+}
+
